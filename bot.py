@@ -3,19 +3,10 @@ import discord
 from discord.ext import commands
 import os
 
-# Reads the bot token from a local INFO.txt file
-script_dir = os.path.dirname(os.path.abspath(__file__))
-INFO_FILE = os.path.join(script_dir, "INFO.txt")
+# Use environment variable for bot token
+TOKEN = os.getenv("DISCORD_TOKEN")
 
-def read_token():
-    """Reads bot token from INFO.txt"""
-    try:
-        with open(INFO_FILE, "r", encoding="utf-8") as file:
-            return file.read().strip()
-    except IOError as e:
-        print(f"Error reading token file: {e}")
-        return None
-
+# Full intents (adjust if you don’t need everything)
 intents = discord.Intents.all()
 
 # Uses mention as prefix, but primarily relies on slash commands
@@ -38,19 +29,18 @@ async def main():
         except Exception as e:
             print(f"Error loading {extension}: {e}")
 
-    token = read_token()
-    if token:
-        await bot.start(token)
+    if TOKEN:
+        await bot.start(TOKEN)
     else:
-        print("Bot token not found. Please check INFO.txt.")
+        print("❌ No bot token found. Please set DISCORD_TOKEN as an environment variable.")
 
 @bot.event
 async def on_ready():
     """Triggered when bot is online."""
-    print(f"Logged in as {bot.user.name}")
+    print(f"✅ Jeeves has risen. Logged in as {bot.user.name}")
     try:
         synced = await bot.tree.sync()
-        print(f"Successfully synced {len(synced)} global commands:")
+        print(f"Synced {len(synced)} global commands:")
         for cmd in synced:
             print(f"- /{cmd.name}")
     except Exception as e:

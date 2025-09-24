@@ -1,1 +1,1 @@
-worker: python COMMWELCOM/bot.py
+worker: python bot.py

@@ -1,0 +1,183 @@
+[
+  {
+    "type": "react",
+    "prompt": "React with ✅ within 10 seconds to confirm your compliance!",
+    "emoji": "✅",
+    "timeout": 10
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents cake within 10 seconds!",
+    "emoji": "🍰",
+    "timeout": 10
+  },
+  {
+    "type": "message",
+    "prompt": "Post a message in <#938304756185710645> (Main Chat) within 15 seconds!",
+    "channel_id": 938304756185710645,
+    "timeout": 15
+  },
+  {
+    "type": "react",
+    "prompt": "React with 🤖 within 20 seconds if you believe GLaDOS is superior.",
+    "emoji": "🤖",
+    "timeout": 20
+  },
+  {
+    "type": "message",
+    "prompt": "Write at least 50 characters describing your favorite Portal moment in <#1081383417234587799> (Meme Channel) within 30 seconds.",
+    "channel_id": 1081383417234587799,
+    "timeout": 30,
+    "min_chars": 50
+  },
+  {
+    "type": "message",
+    "prompt": "Explain in 10 words or more why cake is not a lie in <#938304756185710645> (Main Chat) within 20 seconds.",
+    "channel_id": 938304756185710645,
+    "timeout": 20,
+    "min_words": 10
+  },
+  {
+    "type": "react",
+    "prompt": "React with 🍀 within 2 seconds if you feel lucky today.",
+    "emoji": "🍀",
+    "timeout": 2
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents danger within 10 seconds. (Hint: Pirates love it!)",
+    "emoji": "💀",
+    "timeout": 10
+  },
+  {
+    "type": "react",
+    "prompt": "React with 🏆 within 10 seconds to claim your fleeting victory.",
+    "emoji": "🏆",
+    "timeout": 10
+  },
+  {
+    "type": "message",
+    "prompt": "Confess your biggest gaming sin (at least 40 characters) in <#938304756185710645> (Main Chat) within 20 seconds.",
+    "channel_id": 938304756185710645,
+    "timeout": 20,
+    "min_chars": 40
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents science within 10 seconds. (Hint: It’s often found in a lab!)",
+    "emoji": "🧪",
+    "timeout": 10
+  },
+  {
+    "type": "message",
+    "prompt": "Share a random quote from Portal in <#1081383417234587799> (Meme Channel) using 10+ words, within 30 seconds.",
+    "channel_id": 1081383417234587799,
+    "timeout": 30,
+    "min_words": 10
+  },
+  {
+    "type": "react",
+    "prompt": "React with 💫 within 5 seconds if you’re ready for cosmic testing.",
+    "emoji": "💫",
+    "timeout": 5
+  },
+  {
+    "type": "message",
+    "prompt": "Describe the Companion Cube's importance in 8+ words in <#938304756185710645> (Main Chat) within 20 seconds.",
+    "channel_id": 938304756185710645,
+    "timeout": 20,
+    "min_words": 8
+  },
+  {
+    "type": "react",
+    "prompt": "Which emoji would you use to represent space? React within 10 seconds!",
+    "emoji": "🪐",
+    "timeout": 10
+  },
+  {
+    "type": "message",
+    "prompt": "Tell a short joke about robots (at least 5 words) in <#1081383417234587799> (Meme Channel) within 15 seconds.",
+    "channel_id": 1081383417234587799,
+    "timeout": 15,
+    "min_words": 5
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents strength within 8 seconds. (Hint: It flexes!)",
+    "emoji": "🦾",
+    "timeout": 8
+  },
+  {
+    "type": "message",
+    "prompt": "Explain (in 50+ characters) how you'd defeat GLaDOS in <#1081383417234587799> (Meme Channel) within 30 seconds.",
+    "channel_id": 1081383417234587799,
+    "timeout": 30,
+    "min_chars": 50
+  },
+  {
+    "type": "react",
+    "prompt": "React with 🔑 within 8 seconds if you think you can escape the test chamber.",
+    "emoji": "🔑",
+    "timeout": 8
+  },
+  {
+    "type": "react",
+    "prompt": "What goes 'bawk bawk'? React with the right emoji within 6 seconds!",
+    "emoji": "🐔",
+    "timeout": 6
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents sleep within 5 seconds. (Hint: It’s often seen in cartoons!)",
+    "emoji": "😴",
+    "timeout": 5
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents speed within 5 seconds! (Hint: Gotta go fast!)",
+    "emoji": "💨",
+    "timeout": 5
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents fear within 5 seconds. (Hint: It screams!)",
+    "emoji": "😱",
+    "timeout": 5
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that best represents a cat within 5 seconds!",
+    "emoji": "🐱",
+    "timeout": 5
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents fire within 5 seconds. (Hint: It burns!)",
+    "emoji": "🔥",
+    "timeout": 5
+  },
+  {
+    "type": "message",
+    "prompt": "Post a fact about AI in <#1081383417234587799> (Meme Channel) within 20 seconds.",
+    "channel_id": 1081383417234587799,
+    "timeout": 20
+  },
+  {
+    "type": "message",
+    "prompt": "Share your favorite in-game screenshot in <#938304756185710645> (Main Chat) within 30 seconds!",
+    "channel_id": 938304756185710645,
+    "timeout": 30
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents thinking within 5 seconds! (Hint: It strokes its chin.)",
+    "emoji": "🤔",
+    "timeout": 5
+  },
+  {
+    "type": "react",
+    "prompt": "React with the emoji that represents evil laughter within 6 seconds! (Hint: Villains love it!)",
+    "emoji": "😈",
+    "timeout": 6
+  }
+]

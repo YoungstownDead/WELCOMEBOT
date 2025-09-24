@@ -1,0 +1,22 @@
+{
+    "users": {
+        "485215922353733645": {
+            "correct_count": 4,
+            "wrong_count": 16,
+            "used_riddles": [
+                8,
+                38
+            ]
+        },
+        "340641479422902292": {
+            "correct_count": 9,
+            "wrong_count": 7,
+            "used_riddles": []
+        },
+        "330896341091745793": {
+            "correct_count": 0,
+            "wrong_count": 1,
+            "used_riddles": []
+        }
+    }
+}

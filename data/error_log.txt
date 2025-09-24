@@ -1,0 +1,1 @@
+2023-11-22 23:39:46.175047 - Error during bot execution: The command gameupdate is already an existing command or alias.

@@ -1,0 +1,23 @@
+{
+    "CHANNEL_ID": 1120155524294524988,
+    "SAVE_FOLDER": "./saved_images",
+    "DATA_FILE": "./data/image_log.json",
+    "TRIGGER_WORDS": [
+        "watching", "forgotten", "shadow", "haunted", "alone", "glitch",
+        "lost", "remember", "echo", "whisper", "dark", "secret", "void",
+        "cursed", "door", "creep", "gone", "mirror", "figure", "eyes",
+        "behind", "silent"
+    ],
+    "CREEPY_MESSAGES": [
+        "You should be careful what you say...",
+        "I don’t think you were supposed to see this again...",
+        "Why does this keep coming back?",
+        "Did you forget about this?",
+        "You’re not alone.",
+        "Some things don’t stay buried.",
+        "It was waiting for you.",
+        "You posted this before… didn't you?",
+        "Are you sure you're alone right now?",
+        "This was supposed to be deleted... wasn't it?"
+    ]
+}

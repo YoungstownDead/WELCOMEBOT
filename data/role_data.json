@@ -1,0 +1,46 @@
+{
+    "used_titles": [
+        "Elite Monster Tease",
+        "Dungeon Trap Tester",
+        "Cursed Armor Disposer",
+        "Noob Slayer Supreme",
+        "Arcane Librarian",
+        "Legendary Box Stacker",
+        "Skeleton Dance Teacher",
+        "Dragon Roar Mimic",
+        "Dimension Portal Navigator",
+        "Minion Horde Wrangler",
+        "Loot Distribution Expert",
+        "Skeleton Fashion Consultant",
+        "Lag Switcher Captain",
+        "Banana Peel Acrobat (adjusted from 'Peel Acrobat')",
+        "Mimic Trap Detector"
+    ],
+    "assigned_roles": {
+        "485215922353733645": {
+            "username": "youngstowndead",
+            "role_name": "Lag Switcher Captain",
+            "assigned_at": "2025-02-28T18:43:30.596884"
+        },
+        "330896341091745793": {
+            "username": "carrubane",
+            "role_name": "Dragon Roar Mimic",
+            "assigned_at": "2025-01-23T20:21:11.653187"
+        },
+        "340641479422902292": {
+            "username": "joeyn0831",
+            "role_name": "Dimension Portal Navigator",
+            "assigned_at": "2025-01-24T12:38:49.682856"
+        },
+        "580507308031737867": {
+            "username": "batfelly",
+            "role_name": "Banana Peel Acrobat (adjusted from 'Peel Acrobat')",
+            "assigned_at": "2025-03-10T07:44:51.539681"
+        },
+        "895769081058299935": {
+            "username": "willith.",
+            "role_name": "Mimic Trap Detector",
+            "assigned_at": "2025-09-24T17:24:14.718997"
+        }
+    }
+}

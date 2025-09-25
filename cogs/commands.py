@@ -20,6 +20,7 @@ SCIENCE_NEWS_BASE_URL = "https://newsapi.org/v2/top-headlines?category=science&l
 # -------------------------------
 NEWS_HISTORY_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "news_history.json")
 
+
 def load_news_history():
     if not os.path.isfile(NEWS_HISTORY_FILE):
         return {}
@@ -28,6 +29,7 @@ def load_news_history():
             return json.load(f)
     except json.JSONDecodeError:
         return {}
+
 
 def save_news_history(history):
     with open(NEWS_HISTORY_FILE, "w", encoding="utf-8") as f:
@@ -44,6 +46,10 @@ def save_json(file_path, data):
 # Helper function to safely send messages
 # -------------------------------
 async def safe_send(interaction: discord.Interaction, **kwargs):
+    """Send a Discord response regardless of whether the original interaction
+    has already been responded to. This avoids common API exceptions when
+    sending followup messages.
+    """
     try:
         if not interaction.response.is_done():
             await interaction.response.send_message(**kwargs)
@@ -79,6 +85,7 @@ lfg_queue = {}
 # (These remain unchanged from your existing file)
 # -------------------------------
 
+
 def log_experiment(user_id):
     """Log completed experiment for a user and return total count."""
     user_data = load_users()
@@ -87,6 +94,7 @@ def log_experiment(user_id):
     user_data["users"][str(user_id)]["experiments_completed"] += 1
     save_json(user_data_file, user_data)
     return user_data["users"][str(user_id)]["experiments_completed"]
+
 
 def check_achievements(user_id):
     """Check and grant achievements based on experiment completion."""
@@ -108,6 +116,7 @@ def check_achievements(user_id):
         save_json(user_data_file, user_data)
     return new_achievements
 
+
 def update_riddle_score(user_id, correct):
     """Update riddle scores for a user."""
     user_str = str(user_id)
@@ -119,6 +128,7 @@ def update_riddle_score(user_id, correct):
         riddle_scores["users"][user_str]["wrong_count"] += 1
     save_json(riddle_scores_file_path, riddle_scores)
     return riddle_scores["users"][user_str]["correct_count"]
+
 
 def load_riddles():
     """Load riddles from riddles.json."""
@@ -132,6 +142,7 @@ def load_riddles():
         print(f"ERROR: {riddles_file_path} has invalid JSON format.")
         return []
 
+
 def load_shame_lines():
     """Load lines of sarcasm from shame.txt."""
     if not os.path.isfile(shame_file_path):
@@ -139,6 +150,7 @@ def load_shame_lines():
     with open(shame_file_path, "r", encoding="utf-8") as f:
         lines = [line.strip() for line in f if line.strip()]
         return lines if lines else ["No insults in the shame file!"]
+
 
 def load_riddle_scores():
     """Load or create riddle_scores.json."""
@@ -155,6 +167,7 @@ def load_riddle_scores():
     except json.JSONDecodeError:
         return {"users": {}}
 
+
 def load_users():
     """Load user data from users.json."""
     if not os.path.isfile(user_data_file):
@@ -164,6 +177,7 @@ def load_users():
             return json.load(f)
     except json.JSONDecodeError:
         return {"users": {}}
+
 
 def load_challenges():
     """Load challenges from challenges.json."""
@@ -176,6 +190,7 @@ def load_challenges():
     except json.JSONDecodeError:
         print(f"ERROR: {challenges_file_path} has invalid JSON format.")
         return []
+
 
 # Preload data
 riddles_data = load_riddles()
@@ -197,21 +212,25 @@ class Commands(commands.Cog):
         embed.add_field(name="Owner", value=server.owner.display_name)
         await safe_send(interaction, embed=embed)
 
-    @app_commands.command(name='cakeorlie', description="Ask someone to choose between cake or lie.")
+    @app_commands.command(name='cakeorlie', description="Offer someone a choice between cake or truth.")
     async def cakeorlie(self, interaction: discord.Interaction, user: discord.Member):
-        response = f"{user.mention}, it's decision time: Cake 🍰 or Lie 💔?"
+        """Present a polite choice of cake or truth to a user."""
+        response = f"{user.mention}, it's decision time: Cake 🍰 or Truth ☕?"
         await safe_send(interaction, content=response)
 
-    @app_commands.command(name='companioncube', description="Assign a companion cube to someone.")
+    @app_commands.command(name='companioncube', description="Entrust a virtual Companion Cube to someone.")
     async def companioncube(self, interaction: discord.Interaction, user: discord.Member):
-        response = f"{user.mention}, you've been assigned a virtual Companion Cube. It's your responsibility to keep it safe. 🤖❤️"
+        """Politely assign a Companion Cube to a user and ask them to care for it."""
+        response = (f"{user.mention}, you have been graciously entrusted with a virtual Companion Cube. "
+                   "Please see that it is well cared for. 🤖❤️")
         await safe_send(interaction, content=response)
 
-    @app_commands.command(name='toxin', description="Apply neurotoxin to a user.")
+    @app_commands.command(name='toxin', description="Deliver a gentle reprimand to a user.")
     async def toxin(self, interaction: discord.Interaction, user: discord.User):
+        """Softened version of the neurotoxin command; politely admonish a user."""
         toxined_users.add(user.id)
         last_neurotoxin_date[user.id] = datetime.date.today()
-        await safe_send(interaction, content=f"{user.name} has been selected for neurotoxin. It will cost you one rebuttal.")
+        await safe_send(interaction, content=f"{user.name} has been gently reprimanded. Please take care in the future.")
 
     @app_commands.command(name='role', description="Assign a random role from available titles.")
     @app_commands.checks.cooldown(1, 600)
@@ -272,14 +291,17 @@ class Commands(commands.Cog):
         if challenge["type"] == "react":
             emoji = challenge.get("emoji", "✅")
             await challenge_msg.add_reaction(emoji)
+
             def check_reaction(reaction, user):
                 return (user.id == user_id and str(reaction.emoji) == emoji and reaction.message.id == challenge_msg.id)
+
             try:
                 await self.bot.wait_for("reaction_add", timeout=challenge["timeout"], check=check_reaction)
                 await self.complete_experiment(interaction, challenge["prompt"])
             except asyncio.TimeoutError:
                 await interaction.followup.send(f"❌ **Failure**, {interaction.user.mention}. You didn't react in time.")
         elif challenge["type"] == "message":
+
             def check_message(m):
                 if m.author.id != user_id:
                     return False
@@ -288,6 +310,7 @@ class Commands(commands.Cog):
                 if challenge.get("min_chars", 0) > 0 and len(m.content) < challenge["min_chars"]:
                     return False
                 return True
+
             try:
                 await self.bot.wait_for("message", timeout=challenge["timeout"], check=check_message)
                 await self.complete_experiment(interaction, challenge["prompt"])
@@ -322,8 +345,10 @@ class Commands(commands.Cog):
             await safe_send(interaction, content=f"{target_user.mention}, do you accept the challenge? React with ✅ within 10 minutes!")
             challenge_msg = await interaction.original_response()
             await challenge_msg.add_reaction("✅")
+
             def check_reaction(reaction, reactor):
                 return reactor == target_user and str(reaction.emoji) == "✅" and reaction.message.id == challenge_msg.id
+
             try:
                 await self.bot.wait_for("reaction_add", timeout=600.0, check=check_reaction)
                 await self.send_riddle(interaction, target_user)
@@ -335,15 +360,19 @@ class Commands(commands.Cog):
         riddle_text = riddle_obj.get("riddle", "No riddle text available.")
         riddle_answer = riddle_obj.get("answer", "").lower().strip()
         await safe_send(interaction, content=f"🔎 {user.mention}, here is your riddle:\n**{riddle_text}**\n*(You have 3 Minutes to answer!)*")
+
         def check_message(m):
             return m.author == user and m.channel == interaction.channel
+
         try:
             guess_msg = await self.bot.wait_for("message", timeout=180.0, check=check_message)
             user_guess = guess_msg.content.lower().strip()
             confirm_msg = await interaction.followup.send(f"🤔 {user.mention}, **is that your final answer?** React with ✅ to confirm.")
             await confirm_msg.add_reaction("✅")
+
             def check_confirmation(reaction, reactor):
                 return (reactor == user and str(reaction.emoji) == "✅" and reaction.message.id == confirm_msg.id)
+
             try:
                 await self.bot.wait_for("reaction_add", timeout=180.0, check=check_confirmation)
                 if riddle_answer in user_guess:
@@ -372,8 +401,9 @@ class Commands(commands.Cog):
         w = stats.get("wrong_count", 0)
         await safe_send(interaction, content=f"🏆 **Global Riddle Score for {target_user.mention}**:\n✅ Correct: {c}\n❌ Wrong: {w}")
 
-    @app_commands.command(name='science', description="Fetch the latest science news with a GLaDOS twist.")
+    @app_commands.command(name='science', description="Fetch the latest science news with a butler's flourish.")
     async def science(self, interaction: discord.Interaction):
+        """Retrieve and present a random science article in a courteous tone."""
         try:
             page = random.randint(1, 3)
             url = f"{SCIENCE_NEWS_BASE_URL}&pageSize=20&page={page}&apiKey={NEWS_API_KEY}"
@@ -382,20 +412,24 @@ class Commands(commands.Cog):
             data = response.json()
             articles = data.get("articles")
             if not articles:
-                await safe_send(interaction, content="No groundbreaking science news at the moment. How disappointing.")
+                await safe_send(interaction, content="No groundbreaking science news at the moment. My apologies.")
                 return
             article = random.choice(articles)
             title = article.get("title", "No title")
             article_url = article.get("url", "No URL provided")
-            glados_comments = [
-                "Behold, another attempt at progress. How utterly inevitable.",
-                "Even you can't ignore this breakthrough... sadly.",
-                "I suppose this is supposed to impress you? How quaint.",
-                "Humanity continues to stumble forward. Congratulations?",
-                "A fascinating tidbit of science—if you can call it progress."
+            # Butler‑style comments replacing GLaDOS snark
+            butler_comments = [
+                "May I present a fascinating discovery for your consideration.",
+                "If I may, this piece of science news might pique your interest.",
+                "Here is a noteworthy advancement you might find enlightening.",
+                "Permit me to draw your attention to this recent scientific accomplishment.",
+                "I humbly offer this scientific tidbit for your perusal."
             ]
-            comment = random.choice(glados_comments)
-            msg = f"Test subject, observe this revelation:\n\n**{title}**\n{article_url}\n\n{comment}"
+            comment = random.choice(butler_comments)
+            msg = (
+                f"{interaction.user.mention}, I have found something of interest for you:\n\n"
+                f"**{title}**\n{article_url}\n\n{comment}"
+            )
             await safe_send(interaction, content=msg)
         except Exception as e:
             await safe_send(interaction, content=f"Error retrieving news: {e}")
@@ -533,14 +567,14 @@ class Commands(commands.Cog):
             color=discord.Color.purple()
         )
         embed.add_field(name="/info", value="Display server information.", inline=True)
-        embed.add_field(name="/cakeorlie", value="Choose: Cake 🍰 or Lie 💔?", inline=True)
-        embed.add_field(name="/companioncube", value="Assign a virtual Companion Cube.", inline=True)
-        embed.add_field(name="/toxin", value="Apply neurotoxin to a user.", inline=True)
+        embed.add_field(name="/cakeorlie", value="Offer someone a choice: Cake 🍰 or Truth ☕?", inline=True)
+        embed.add_field(name="/companioncube", value="Entrust a virtual Companion Cube.", inline=True)
+        embed.add_field(name="/toxin", value="Deliver a gentle reprimand to a user.", inline=True)
         embed.add_field(name="/role", value="Assign a random role from quirky titles.", inline=True)
         embed.add_field(name="/experiment", value="Initiate a random experiment challenge.", inline=True)
         embed.add_field(name="/riddle", value="Challenge someone with a riddle.", inline=True)
         embed.add_field(name="/riddlescore", value="Show global riddle scores.", inline=True)
-        embed.add_field(name="/science", value="Fetch the latest science news with a GLaDOS twist.", inline=True)
+        embed.add_field(name="/science", value="Fetch the latest science news with a butler's flourish.", inline=True)
         embed.add_field(name="/steamlookup", value="Look up a game on Steam.", inline=True)
         embed.add_field(name="/leaderboard", value="Display the global leaderboard for experiments and riddles.", inline=True)
         embed.add_field(name="/urlmusic", value="Stream music from a URL.", inline=True)
@@ -550,6 +584,7 @@ class Commands(commands.Cog):
         embed.add_field(name="/commands", value="Display this command list.", inline=True)
         embed.set_footer(text="That's the full extent of my dazzling capabilities!")
         await safe_send(interaction, embed=embed)
+
 
 async def setup(bot: commands.Bot):
     try:

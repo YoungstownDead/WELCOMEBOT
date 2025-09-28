@@ -28,6 +28,23 @@ class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @app_commands.command(name='chat', description="Chat with the bot. Persistent conversation.")
+    async def chat(self, interaction: discord.Interaction, message: str):
+        from utils.helpers import get_user_history, append_user_message
+        user_id = interaction.user.id
+        history_file = "data/conversation_history.json"
+        # Append user message
+        append_user_message(user_id, f"User: {message}", history_file)
+        # Retrieve last 5 messages for context
+        history = get_user_history(user_id, history_file)[-5:]
+        # Simple bot response (replace with AI/logic as needed)
+        bot_reply = f"You said: {message}"
+        append_user_message(user_id, f"Bot: {bot_reply}", history_file)
+        # Format history for display
+        history_text = "\n".join([f"[{h['timestamp']}] {h['message']}" for h in history])
+        response = f"**Conversation history:**\n{history_text}\n\n**Bot:** {bot_reply}"
+        await safe_send(interaction, content=response)
+
     @app_commands.command(name='info', description="Display server information.")
     async def info(self, interaction: discord.Interaction):
         server = interaction.guild

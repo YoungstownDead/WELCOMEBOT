@@ -26,3 +26,27 @@ def load_json(file_path):
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
+
+# Conversation history helpers
+def get_user_history(user_id, file_path):
+    data = load_json(file_path)
+    return data.get(str(user_id), [])
+
+def append_user_message(user_id, message, file_path):
+    import datetime
+    data = load_json(file_path)
+    user_id = str(user_id)
+    if user_id not in data:
+        data[user_id] = []
+    data[user_id].append({
+        "timestamp": datetime.datetime.utcnow().isoformat(),
+        "message": message
+    })
+    save_json(file_path, data)
+
+def clear_user_history(user_id, file_path):
+    data = load_json(file_path)
+    user_id = str(user_id)
+    if user_id in data:
+        data[user_id] = []
+        save_json(file_path, data)

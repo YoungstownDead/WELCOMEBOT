@@ -4,6 +4,8 @@ import json
 import discord
 from discord.ext import commands
 
+from utils.gpt_client import DEFAULT_SYSTEM_PROMPT, gpt_is_configured, request_chat_completion
+
 # ----- File Paths ----- 
 # Change DATA_FOLDER to "welcomedata" if your welcome assets live there.
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -132,6 +134,8 @@ class Events(commands.Cog):
         if message.author.bot:
             return
 
+        await self._maybe_reply_with_gpt(message)
+
         if message.guild is None or message.guild.id != PRIMARY_GUILD_ID:
             await self.bot.process_commands(message)
             return
@@ -175,6 +179,44 @@ class Events(commands.Cog):
             except discord.Forbidden:
                 print(f"Permission denied: Cannot create the role '{role_name}' in guild {guild.id}.")
         return role
+
+    async def _maybe_reply_with_gpt(self, message: discord.Message) -> bool:
+        """Respond with a GPT-powered message when directly addressed."""
+
+        if message.guild is None:
+            should_reply = True
+        else:
+            bot_user = self.bot.user
+            should_reply = bool(bot_user and bot_user in message.mentions)
+
+        if not should_reply:
+            return False
+
+        if not gpt_is_configured():
+            await message.channel.send(
+                "I regret to inform you that no GPT API key was configured."
+            )
+            return True
+
+        prompt = message.clean_content.strip()
+        if not prompt:
+            prompt = "The user addressed you without providing any content."
+
+        try:
+            async with message.channel.typing():
+                reply = await request_chat_completion(
+                    prompt,
+                    system_prompt=DEFAULT_SYSTEM_PROMPT,
+                )
+        except Exception as exc:
+            await message.channel.send(f"I encountered a difficulty consulting GPT: {exc}")
+            return True
+
+        if not reply:
+            reply = "I am afraid GPT had no response to offer."
+
+        await message.channel.send(f"{message.author.mention} {reply}")
+        return True
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Events(bot))

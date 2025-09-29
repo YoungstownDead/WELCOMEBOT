@@ -1,16 +1,33 @@
-import discord
-from discord import app_commands
-from discord.ext import commands
 import os
-import datetime
 import random
 import json
 import asyncio
-from typing import Optional
+import datetime
+from typing import Any, Optional
+
+import discord
+from discord import app_commands
+from discord.ext import commands
 import requests  # For API calls
 
+from utils.gpt_client import (
+    GPT_API_KEY,
+    DEFAULT_SYSTEM_PROMPT,
+    gpt_is_configured,
+    get_openai_client,
+    request_chat_completion,
+)
+
 # -------------------------------
-# Helper for safe messaging
+# Setup
+# -------------------------------
+intents = discord.Intents.default()
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+openai_client: Optional[Any] = get_openai_client()
+
+# -------------------------------
+# Safe send helper
 # -------------------------------
 async def safe_send(interaction: discord.Interaction, **kwargs):
     try:
@@ -18,56 +35,47 @@ async def safe_send(interaction: discord.Interaction, **kwargs):
             await interaction.response.send_message(**kwargs)
         else:
             await interaction.followup.send(**kwargs)
-    except discord.errors.NotFound:
-        await interaction.followup.send(**kwargs)
+    except Exception as e:
+        # fallback log or error send
+        if not interaction.response.is_done():
+            await interaction.response.send_message(content=f"Error: {e}")
+        else:
+            await interaction.followup.send(content=f"Error: {e}")
 
 # -------------------------------
-# Command Cog Class (no music)
+# Commands
 # -------------------------------
-class Commands(commands.Cog):
-    def __init__(self, bot):
+class MyBot(commands.Cog):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name='chat', description="Chat with the bot. Persistent conversation.")
-    async def chat(self, interaction: discord.Interaction, message: str):
-        from utils.helpers import get_user_history, append_user_message
-        user_id = interaction.user.id
-        history_file = "data/conversation_history.json"
-        # Append user message
-        append_user_message(user_id, f"User: {message}", history_file)
-        # Retrieve last 5 messages for context
-        history = get_user_history(user_id, history_file)[-5:]
-        # Simple bot response (replace with AI/logic as needed)
-        bot_reply = f"You said: {message}"
-        append_user_message(user_id, f"Bot: {bot_reply}", history_file)
-        # Format history for display
-        history_text = "\n".join([f"[{h['timestamp']}] {h['message']}" for h in history])
-        response = f"**Conversation history:**\n{history_text}\n\n**Bot:** {bot_reply}"
-        await safe_send(interaction, content=response)
-
-    @app_commands.command(name='info', description="Display server information.")
+    @app_commands.command(name="info", description="Display server information.")
     async def info(self, interaction: discord.Interaction):
-        server = interaction.guild
-        embed = discord.Embed(title=f"{server.name} Information", color=0x008080)
-        embed.add_field(name="Members", value=server.member_count)
-        embed.add_field(name="Owner", value=server.owner.display_name)
+        guild = interaction.guild
+        embed = discord.Embed(
+            title=f"Info for {guild.name}",
+            description="Here are some server details:",
+            color=discord.Color.green()
+        )
+        embed.add_field(name="Server ID", value=guild.id, inline=True)
+        embed.add_field(name="Members", value=guild.member_count, inline=True)
+        embed.set_footer(text="At your service.")
         await safe_send(interaction, embed=embed)
 
-    @app_commands.command(name='cakeorlie', description="A polite choice: Cake 🍰 or Truth ☕.")
-    async def cakeorlie(self, interaction: discord.Interaction, user: discord.Member):
-        response = f"{user.mention}, pray tell — will you choose Cake 🍰 or Truth ☕?"
-        await safe_send(interaction, content=response)
+    @app_commands.command(name="cakeorlie", description="Cake 🍰 or Truth ☕?")
+    async def cakeorlie(self, interaction: discord.Interaction):
+        choice = random.choice(["Cake 🍰", "Truth ☕"])
+        await safe_send(interaction, content=f"{interaction.user.mention}, you chose: **{choice}**")
 
-    @app_commands.command(name='companioncube', description="Assign a virtual Companion Cube.")
+    @app_commands.command(name="companioncube", description="Assign a virtual Companion Cube.")
     async def companioncube(self, interaction: discord.Interaction, user: discord.Member):
-        response = f"{user.mention}, you’ve been entrusted with a Companion Cube. Treat it with care. 🎁"
-        await safe_send(interaction, content=response)
+        await safe_send(interaction, content=f"{user.mention}, you’ve been gifted a weighted Companion Cube 🎁")
 
-    @app_commands.command(name='toxin', description="Deliver a gentle reprimand.")
+    @app_commands.command(name="toxin", description="Deliver a gentle reprimand.")
     async def toxin(self, interaction: discord.Interaction, user: discord.User):
         await safe_send(interaction, content=f"{user.name} has been ever so gently reprimanded.")
 
-    @app_commands.command(name='science', description="Fetch the latest science news.")
+    @app_commands.command(name="science", description="Fetch the latest science news.")
     async def science(self, interaction: discord.Interaction):
         polite_comments = [
             "If I may, here is a fascinating discovery.",
@@ -76,12 +84,12 @@ class Commands(commands.Cog):
         ]
         try:
             url = f"https://newsapi.org/v2/top-headlines?category=science&language=en&apiKey=YOUR_API_KEY"
-            response = requests.get(url)
+            response = requests.get(url, timeout=10)
             response.raise_for_status()
             data = response.json()
             articles = data.get("articles")
             if not articles:
-                await safe_send(interaction, content="No science news at this time, sir.")
+                await safe_send(interaction, content="No science news at this time.")
                 return
             article = random.choice(articles)
             title = article.get("title", "No title")
@@ -92,21 +100,52 @@ class Commands(commands.Cog):
         except Exception as e:
             await safe_send(interaction, content=f"Error retrieving news: {e}")
 
-    @app_commands.command(name='commands', description="Display available commands.")
+    @app_commands.command(name="commands", description="Display available commands.")
     async def commands_list(self, interaction: discord.Interaction):
         embed = discord.Embed(
             title="📜 Command List",
-            description="Here are my current services, at your disposal:",
+            description="Here are my current services:",
             color=discord.Color.blue()
         )
         embed.add_field(name="/info", value="Display server information.", inline=True)
-        embed.add_field(name="/cakeorlie", value="A polite choice: Cake 🍰 or Truth ☕.", inline=True)
+        embed.add_field(name="/cakeorlie", value="Cake 🍰 or Truth ☕.", inline=True)
         embed.add_field(name="/companioncube", value="Assign a virtual Companion Cube.", inline=True)
         embed.add_field(name="/toxin", value="Deliver a gentle reprimand.", inline=True)
         embed.add_field(name="/science", value="Fetch the latest science news.", inline=True)
+        embed.add_field(name="/askgpt", value="Consult GPT for a thoughtful reply.", inline=True)
         embed.add_field(name="/commands", value="Display this command list.", inline=True)
         embed.set_footer(text="At your service.")
         await safe_send(interaction, embed=embed)
 
+    @app_commands.command(name="askgpt", description="Consult GPT for a thoughtful reply.")
+    @app_commands.describe(prompt="The query you would like me to relay to GPT.")
+    async def askgpt(self, interaction: discord.Interaction, prompt: str):
+        if not GPT_API_KEY or not gpt_is_configured() or not openai_client:
+            await safe_send(interaction, content="I regret to inform you that no GPT API key was configured.")
+            return
+
+        # Defer to avoid interaction timeout
+        await interaction.response.defer(thinking=True)
+
+        try:
+            message = await request_chat_completion(
+                prompt,
+                system_prompt=DEFAULT_SYSTEM_PROMPT,
+            )
+            if not message:
+                message = "GPT returned no content, I'm afraid."
+
+            await interaction.followup.send(
+                f"{interaction.user.mention}, GPT suggests:\n\n{message}"
+            )
+        except Exception as e:
+            await interaction.followup.send(f"Error: {e}")
+
+
+# -------------------------------
+# Cog / Bot Setup
+# -------------------------------
 async def setup(bot: commands.Bot):
-    await bot.add_cog(Commands(bot))
+    await bot.add_cog(MyBot(bot))
+
+# Run like normal with bot.run("YOUR_TOKEN")

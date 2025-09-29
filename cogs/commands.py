@@ -1,13 +1,25 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-import os
 import datetime
 import random
 import json
 import asyncio
-from typing import Optional
+from typing import Any, Optional
 import requests  # For API calls
+
+from utils.gpt_client import (
+    GPT_API_KEY,
+    DEFAULT_SYSTEM_PROMPT,
+    gpt_is_configured,
+    get_openai_client,
+    request_chat_completion,
+)
+
+# -------------------------------
+# Environment configuration
+# -------------------------------
+openai_client: Optional[Any] = get_openai_client()
 
 # -------------------------------
 # Helper for safe messaging
@@ -92,6 +104,34 @@ class Commands(commands.Cog):
         except Exception as e:
             await safe_send(interaction, content=f"Error retrieving news: {e}")
 
+    @app_commands.command(name='askgpt', description="Consult GPT for a thoughtful reply.")
+    @app_commands.describe(prompt="The query you would like me to relay to GPT.")
+    async def askgpt(self, interaction: discord.Interaction, prompt: str):
+        if not GPT_API_KEY or not gpt_is_configured() or not openai_client:
+            await safe_send(
+                interaction,
+                content="I regret to inform you that no GPT API key was configured."
+            )
+            return
+
+        try:
+            message = await request_chat_completion(
+                prompt,
+                system_prompt=DEFAULT_SYSTEM_PROMPT,
+            )
+            if not message:
+                message = "GPT returned no content, I'm afraid."
+
+            await safe_send(
+                interaction,
+                content=f"{interaction.user.mention}, GPT suggests:\n\n{message}"
+            )
+        except Exception as exc:
+            await safe_send(
+                interaction,
+                content=f"I encountered a difficulty consulting GPT: {exc}"
+            )
+
     @app_commands.command(name='commands', description="Display available commands.")
     async def commands_list(self, interaction: discord.Interaction):
         embed = discord.Embed(
@@ -104,7 +144,13 @@ class Commands(commands.Cog):
         embed.add_field(name="/companioncube", value="Assign a virtual Companion Cube.", inline=True)
         embed.add_field(name="/toxin", value="Deliver a gentle reprimand.", inline=True)
         embed.add_field(name="/science", value="Fetch the latest science news.", inline=True)
+        embed.add_field(name="/askgpt", value="Consult GPT for a thoughtful reply.", inline=True)
         embed.add_field(name="/commands", value="Display this command list.", inline=True)
+        embed.add_field(
+            name="Chat with me",
+            value="Mention me or send a DM and I will consult GPT on your behalf.",
+            inline=False,
+        )
         embed.set_footer(text="At your service.")
         await safe_send(interaction, embed=embed)
 

@@ -3,3 +3,4 @@ requests
 pillow
 yt-dlp
 pytz
+openai
